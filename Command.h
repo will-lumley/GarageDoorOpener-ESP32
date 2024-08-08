@@ -19,9 +19,6 @@ enum CommandType {
   DISCONNECT,
   RESET,
 
-  CREATE_GARAGE_DOOR,
-  SET_POLL_HOMEKIT_TRUE,
-
   UNKNOWN
 };
 

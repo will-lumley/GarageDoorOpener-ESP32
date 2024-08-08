@@ -14,8 +14,6 @@ Command getCommand(const String& commandStr) {
 
   if (commandStr == "CONNECT")    return Command(CONNECT);
   if (commandStr == "DISCONNECT") return Command(DISCONNECT);
-  if (commandStr == "CREATE_GARAGE_DOOR") return Command(CREATE_GARAGE_DOOR);
-  if (commandStr == "SET_POLL_HOMEKIT_TRUE") return Command(SET_POLL_HOMEKIT_TRUE);
   if (commandStr == "RESET") return Command(RESET);
   
   return Command(UNKNOWN);

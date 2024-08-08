@@ -1,12 +1,15 @@
-#include <ESP8266WiFi.h>
-#include <arduino_homekit_server.h>
 #include <EEPROM.h>
-#include <ESP8266mDNS.h>
+#include <HomeSpan.h>
+#include <WiFi.h>
 
 #include "Command.h"
+#include "GarageDoorAccessory.h"
 #include "WiFiHelpers.h"
 
 #define RELAY_PIN 5
+
+#define LED_A 22
+#define LED_B 23
 
 #define ESP_DEBUG true
 #define EEPROM_SIZE 4096
@@ -16,35 +19,32 @@ String pass = "";
 int channel = 0;
 int connectionTimeout = 300;
 
-bool pollHomeKit = false;
-
-// Grab our HomeKit configuration from GarageDoorAccessory.c
-extern "C" homekit_server_config_t config;
-extern "C" homekit_characteristic_t homeKitGarage;
+std::shared_ptr<GarageDoorAccessory> garage;
 
 void setup() {
   Serial.begin(115200);
   delay(500);
 
   EEPROM.begin(EEPROM_SIZE);
-  Serial.println("* ESP8266 booted up.");
-
-  WiFi.persistent(false);
   WiFi.mode(WIFI_STA);
-  // WiFi.onStationModeDisconnected(onWiFiDisconnect);
+  homeSpan.setPairingCode("11112222");
+
+  Serial.println("* ESP32 booted up.");
 
 #if ESP_DEBUG
   ssid = "ravioli";
   pass = "tu2y259jhh";
   channel = 1;
 
-  ssid = "Will's iPhone";
-  pass = "password";
-  channel = 0;
-
   delay(2000);
   connect();
 #endif
+
+  pinMode(LED_A, OUTPUT);
+  pinMode(LED_B, OUTPUT);
+
+  digitalWrite(LED_A, LOW);
+  digitalWrite(LED_B, LOW);
 }
 
 void loop() {
@@ -59,81 +59,66 @@ void loop() {
     handleCommand(command);
   }
 
-  arduino_homekit_loop();
-  MDNS.announce();
-
-  // If we've created the garage door accessory, and we're paired, let's poll
-  // homekit_server_t *homekit_server = arduino_homekit_get_running_server();
-  // if (homekit_server != nullptr && homekit_server->paired) {
-
-  // } else {
-    // Serial.println("Performing HomeKit loop.");
-    // arduino_homekit_loop();
-  // }
+  // If we're connected to the WiFi network, poll HomeSpan
+  if (isConnected()) {
+    homeSpan.poll();
+  }
 }
 
 void handleCommand(Command command) {
   switch (command.type) {
     case GET_WIFI_CONN: {
-      getWiFiConnectionStatus();
-      break;
-    }
+        getWiFiConnectionStatus();
+        break;
+      }
     case GET_IP_ADDR: {
-      getIPAddress();
-      break;
-    }
+        getIPAddress();
+        break;
+      }
     case GET_MAC_ADDR: {
         getMACAddress();
         break;
       }
     case GET_SSID: {
-      getSSID();
-      break;
-    }
+        getSSID();
+        break;
+      }
     case GET_CHANNEL: {
-      getChannel();
-      break;
-    }
+        getChannel();
+        break;
+      }
     case GET_HOSTNAME: {
-      getHostName();
-      break;
-    }
+        getHostName();
+        break;
+      }
     case SET_SSID: {
-      setSSID(command.value);
-      break;
-    }
+        setSSID(command.value);
+        break;
+      }
     case SET_PASS: {
-      setPassword(command.value);
-      break;
-    }
+        setPassword(command.value);
+        break;
+      }
     case SET_CHANNEL: {
-      setChannel(command.value.toInt());
-      break;
-    }
+        setChannel(command.value.toInt());
+        break;
+      }
     case CONNECT: {
-      connect();
-      break;
-    }
+        connect();
+        break;
+      }
     case DISCONNECT: {
-      disconnect();
-      break;
-    }
-    case CREATE_GARAGE_DOOR: {
-      createGarageDoor();
-      break;
-    }
-    case SET_POLL_HOMEKIT_TRUE: {
-      setPollHomeKit(true);
-      break;
-    }
+        disconnect();
+        break;
+      }
     case RESET: {
-      reset();
-      break;
-    }
+        reset();
+        break;
+      }
     default: {
-      Serial.println("* Unknown command");
-      break;
-    }
+        Serial.println("* Unknown command");
+        break;
+      }
   }
 }
 
@@ -158,7 +143,7 @@ void getChannel() {
 }
 
 void getHostName() {
-  Serial.println(WiFi.hostname());
+  Serial.println(WiFi.getHostname());
 }
 
 void setSSID(String newSSID) {
@@ -191,11 +176,33 @@ void connect() {
     Serial.println("* Connecting for " + String(timeout) + " seconds.");
   }
 
-  Serial.println("* WiFi Connection: " + String(wifiStatusDescription(WiFi.status())));
+  homeSpan.begin(Category::GarageDoorOpeners, "Garage Door");
+  homeSpan.setWifiCredentials(ssidChar, passChar);
 
-  #if ESP_DEBUG
-  createGarageDoor();
-  #endif
+  // Create a new accessory
+  new SpanAccessory();
+  
+  // Add Accessory Information Service with required characteristics
+  new Service::AccessoryInformation();
+    new Characteristic::Identify();
+    new Characteristic::Name("Garage Door");
+    new Characteristic::Manufacturer("William Lumley");
+    new Characteristic::SerialNumber("123456789");
+    new Characteristic::Model("ESP32 Garage Door");
+    new Characteristic::FirmwareRevision("1.0");
+
+  garage = std::make_shared<GarageDoorAccessory>();
+  garage->onOpen = []() {
+    digitalWrite(LED_A, HIGH);
+    digitalWrite(LED_B, LOW);
+  };
+  garage->onClose = []() {
+    Serial.println("BAR");
+    digitalWrite(LED_A, LOW);
+    digitalWrite(LED_B, HIGH);
+  };
+
+  Serial.println("* WiFi Connection: " + String(wifiStatusDescription(WiFi.status())));
 }
 
 void disconnect() {
@@ -203,53 +210,11 @@ void disconnect() {
   Serial.println("* Disconnected from WiFi.");
 }
 
-void createGarageDoor() {
-  homeKitGarage.setter = homeKitUpdatedValue;
-  arduino_homekit_setup(&config);
-  setPollHomeKit(true);
-  Serial.println("* Created Garage Door.");
-}
-
-void setPollHomeKit(bool newPollHomeKit) {
-  pollHomeKit = newPollHomeKit;
-  Serial.println("* PollHomeKit: " + String(pollHomeKit));
-}
-
 void reset() {
-  // Reset the EEPROM
-  /*--------------------------*/
-  size_t eepromLength = EEPROM.length();
-  Serial.println("* EEPROM.length(): " + String(eepromLength));
-
-  for (int i = 0 ; i < eepromLength ; i++) {
-    EEPROM.write(i, 0);
-  }
-  EEPROM.commit();
-  Serial.println("* Reset EEPROM.");
-  /*--------------------------*/
-
-  // Reset the HomeKit server
-  /*--------------------------*/
-  homekit_server_t *homekit_server = arduino_homekit_get_running_server();
-  if (homekit_server != nullptr) {
-      homekit_storage_reset();
-
-      Serial.println("* Reset HomeKit Server.");
-      ESP.restart();
-  } else{
-    Serial.println("* Failed to reset HomeKit Server.");
-  }
-  /*--------------------------*/
+  // Tell the HomeSpan to unpair
+  homeSpan.processSerialCommand("U");
 }
 
-void homeKitUpdatedValue(const homekit_value_t value) {
-  bool on = value.bool_value;
-  homeKitGarage.value.bool_value = on;
-
-  if (on) {
-    Serial.println("* HomeKit turned garage door ON.");
-  } else {
-    Serial.println("* HomeKit turned garage door OFF.");
-  }
-  // digitalWrite(PIN_SWITCH, on ? LOW : HIGH);
+bool isConnected() {
+  return WiFi.status() == WL_CONNECTED;
 }
