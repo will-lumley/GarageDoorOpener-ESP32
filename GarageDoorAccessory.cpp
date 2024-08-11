@@ -27,18 +27,16 @@ boolean GarageDoorAccessory::update() {
     currentState->setVal(currentState->OPENING);
     obstruction->setVal(false);
 
-    // Notify our delegate
     if (onOpen) {
-        onOpen();
+      onOpen();
     }
   } else {
     Serial.println("* Closing Garage Door.");
     currentState->setVal(currentState->CLOSING);
     obstruction->setVal(false);
 
-    // Notify our delegate
     if (onClose) {
-        onClose();
+      onClose();
     }
   }
 

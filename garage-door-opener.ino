@@ -6,26 +6,23 @@
 #include "GarageDoorAccessory.h"
 #include "WiFiHelpers.h"
 
-#define RELAY_PIN 5
-
-#define LED_A 22
-#define LED_B 23
+#define RELAY_PIN 23
 
 #define ESP_DEBUG true
-#define EEPROM_SIZE 4096
 
 String ssid = "";
 String pass = "";
-int channel = 0;
 int connectionTimeout = 300;
 
 std::shared_ptr<GarageDoorAccessory> garage;
 
 void setup() {
+  pinMode(RELAY_PIN, 0X00);
+  // pinMode(RELAY_PIN, OUTPUT);
+
   Serial.begin(115200);
   delay(500);
 
-  EEPROM.begin(EEPROM_SIZE);
   WiFi.mode(WIFI_STA);
   homeSpan.setPairingCode("11112222");
 
@@ -34,17 +31,9 @@ void setup() {
 #if ESP_DEBUG
   ssid = "ravioli";
   pass = "tu2y259jhh";
-  channel = 1;
-
   delay(2000);
   connect();
 #endif
-
-  pinMode(LED_A, OUTPUT);
-  pinMode(LED_B, OUTPUT);
-
-  digitalWrite(LED_A, LOW);
-  digitalWrite(LED_B, LOW);
 }
 
 void loop() {
@@ -67,55 +56,51 @@ void loop() {
 
 void handleCommand(Command command) {
   switch (command.type) {
-    case GET_WIFI_CONN: {
+    case GET_WIFI_CONN:
+      {
         getWiFiConnectionStatus();
         break;
       }
-    case GET_IP_ADDR: {
+    case GET_IP_ADDR:
+      {
         getIPAddress();
         break;
       }
-    case GET_MAC_ADDR: {
+    case GET_MAC_ADDR:
+      {
         getMACAddress();
         break;
       }
-    case GET_SSID: {
-        getSSID();
-        break;
-      }
-    case GET_CHANNEL: {
-        getChannel();
-        break;
-      }
-    case GET_HOSTNAME: {
+    case GET_HOSTNAME:
+      {
         getHostName();
         break;
       }
-    case SET_SSID: {
-        setSSID(command.value);
-        break;
-      }
-    case SET_PASS: {
-        setPassword(command.value);
-        break;
-      }
-    case SET_CHANNEL: {
-        setChannel(command.value.toInt());
-        break;
-      }
-    case CONNECT: {
+    case CONNECT:
+      {
         connect();
         break;
       }
-    case DISCONNECT: {
+    case DISCONNECT:
+      {
         disconnect();
         break;
       }
-    case RESET: {
+    case RESET:
+      {
         reset();
         break;
       }
-    default: {
+    case OPEN_GARAGE: {
+      garage->open();
+      break;
+    }
+    case CLOSE_GARAGE: {
+      garage->close();
+      break;
+    }
+    default:
+      {
         Serial.println("* Unknown command");
         break;
       }
@@ -134,31 +119,8 @@ void getMACAddress() {
   Serial.println(WiFi.macAddress());
 }
 
-void getSSID() {
-  Serial.println(ssid.c_str());
-}
-
-void getChannel() {
-  Serial.println(String(channel));
-}
-
 void getHostName() {
   Serial.println(WiFi.getHostname());
-}
-
-void setSSID(String newSSID) {
-  ssid = newSSID;
-  Serial.println(ssid);
-}
-
-void setPassword(String newPass) {
-  pass = newPass;
-  Serial.println(pass);
-}
-
-void setChannel(int newChannel) {
-  channel = newChannel;
-  Serial.println(String(channel));
 }
 
 void connect() {
@@ -167,7 +129,7 @@ void connect() {
   const char* passChar = pass.c_str();
 
   // Connect to our WiFi
-  WiFi.begin(ssidChar, passChar, channel);
+  WiFi.begin(ssidChar, passChar);
   int timeout = 0;
   while (WiFi.status() != WL_CONNECTED && timeout < connectionTimeout) {
     delay(1000);
@@ -193,18 +155,14 @@ void connect() {
 
   garage = std::make_shared<GarageDoorAccessory>();
   garage->onOpen = []() {
-    digitalWrite(LED_A, HIGH);
-    digitalWrite(LED_B, LOW);
+    toggleRelayPin();
   };
   garage->onClose = []() {
-    Serial.println("BAR");
-    digitalWrite(LED_A, LOW);
-    digitalWrite(LED_B, HIGH);
+    toggleRelayPin();
   };
 
   Serial.println("* WiFi Connection: " + String(wifiStatusDescription(WiFi.status())));
 }
-
 void disconnect() {
   WiFi.disconnect();
   Serial.println("* Disconnected from WiFi.");
@@ -213,6 +171,14 @@ void disconnect() {
 void reset() {
   // Tell the HomeSpan to unpair
   homeSpan.processSerialCommand("U");
+}
+
+void toggleRelayPin() {
+  pinMode(RELAY_PIN, OUTPUT);
+  digitalWrite(RELAY_PIN, HIGH);
+  delay(1000);
+  digitalWrite(RELAY_PIN, LOW);
+  pinMode(RELAY_PIN, 0x00);
 }
 
 bool isConnected() {
