@@ -3,14 +3,12 @@
 # HomeKit Integrated Garage Door
 
 <div align="center">
-    <br/>
-    <br/> 
 
 <strong>
     Turn any dumb garage door opener into a full HomeKit accessory for under <em>$22 AUD</em>.
 </strong>
 
-<br/><br/> 
+<br/>
 
 <img src="https://img.shields.io/badge/ESP32-Supported-0080ff?logo=espressif&logoColor=white" /> 
 <img src="https://img.shields.io/badge/HomeSpan-Ready-44cc11?logo=apple&logoColor=white" /> 
