@@ -1,4 +1,4 @@
-![HomeKit Garage](https://github.com/will-lumley/GarageDoorOpener-ESP32/main/GarageDoor.png)
+![HomeKit Garage](https://raw.githubusercontent.com/will-lumley/GarageDoorOpener-ESP32/refs/heads/main/GarageDoor.png)
 
 # HomeKit Integrated Garage Door
 
