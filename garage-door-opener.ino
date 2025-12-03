@@ -8,8 +8,6 @@
 
 #define RELAY_PIN 23
 
-#define ESP_DEBUG true
-
 String ssid = "";
 String pass = "";
 int connectionTimeout = 300;
@@ -28,9 +26,10 @@ void setup() {
 
   Serial.println("* ESP32 booted up.");
 
-#if ESP_DEBUG
-  ssid = "ravioli";
-  pass = "tu2y259jhh";
+
+  ssid = "ssid";
+  pass = "password";
+  
   delay(2000);
   connect();
 #endif
