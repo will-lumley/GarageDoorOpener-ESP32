@@ -4,9 +4,7 @@
 
 <div align="center">
 
-<strong>
-    Turn any dumb garage door opener into a full HomeKit accessory for under <em>$22 AUD</em>.
-</strong>
+Turn any dumb garage door opener into a full HomeKit accessory.
 
 <br />
 
