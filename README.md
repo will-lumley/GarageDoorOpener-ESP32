@@ -8,12 +8,13 @@
     Turn any dumb garage door opener into a full HomeKit accessory for under <em>$22 AUD</em>.
 </strong>
 
-<br /><br />
+<br />
 
 <img src="https://img.shields.io/badge/ESP32-Supported-0080ff?logo=espressif&logoColor=white" /> 
 <img src="https://img.shields.io/badge/HomeSpan-Ready-44cc11?logo=apple&logoColor=white" /> 
 <img src="https://img.shields.io/badge/HomeKit-Compatible-f5b042?logo=apple&logoColor=white" /> 
 <img src="https://img.shields.io/badge/License-MIT-blue.svg" /> 
+
 </div>
 
 ## 🌟 Overview
@@ -28,13 +29,21 @@ Just a small microcontroller, a relay, and a bit of code.
 ## ✨ Features
 
 🏠 Native HomeKit Accessory — appears as a real Garage Door Opener
+
 🎙️ Siri Commands — “Hey Siri, open the garage”
+
 ⚙️ Automations — open on arrival, close on departure
+
 🔒 Fully Local Control — uses Apple’s encrypted HAP protocol
+
 ⚡ Reliable Relay Triggering
+
 🚪 Door State Reporting — Opening, Open, Closing, Closed
+
 💻 Custom Firmware Included
+
 🧩 Cheap hardware — ESP32 + relay + buck converter = <$22
+
 
 ## 🚀 Installation
 
