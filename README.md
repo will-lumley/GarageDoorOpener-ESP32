@@ -15,6 +15,8 @@ Turn any dumb garage door opener into a full HomeKit accessory.
 
 </div>
 
+<br />
+
 ## 🌟 Overview
 
 This project transforms almost any garage door opener into a local, secure, Siri-enabled smart garage accessory powered by the ESP32 and HomeSpan.
@@ -23,6 +25,8 @@ No subscriptions.
 No $250 proprietary garage controller.
 
 Just a small microcontroller, a relay, and a bit of code.
+
+<br />
 
 ## ✨ Features
 
@@ -42,6 +46,7 @@ Just a small microcontroller, a relay, and a bit of code.
 
 🧩 Cheap hardware — ESP32 + relay + buck converter = <$22
 
+<br />
 
 ## 🚀 Installation
 
