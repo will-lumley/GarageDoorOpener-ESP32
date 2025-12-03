@@ -2,7 +2,20 @@
 
 # HomeKit Integrated Garage Door
 
-<div align="center"> <img src="./logo.png" width="200" alt="HomeKit Garage Logo" /> <br/><br/> <strong>Turn any dumb garage door opener into a full HomeKit accessory for under <em>$22 AUD</em>.</strong> <br/><br/> <img src="https://img.shields.io/badge/ESP32-Supported-0080ff?logo=espressif&logoColor=white" /> <img src="https://img.shields.io/badge/HomeSpan-Ready-44cc11?logo=apple&logoColor=white" /> <img src="https://img.shields.io/badge/HomeKit-Compatible-f5b042?logo=apple&logoColor=white" /> <img src="https://img.shields.io/badge/License-MIT-blue.svg" /> </div>
+<div align="center">
+    <br/><br/> 
+
+    <strong>
+        Turn any dumb garage door opener into a full HomeKit accessory for under <em>$22 AUD</em>.
+    </strong>
+
+    <br/><br/> 
+
+    <img src="https://img.shields.io/badge/ESP32-Supported-0080ff?logo=espressif&logoColor=white" /> 
+    <img src="https://img.shields.io/badge/HomeSpan-Ready-44cc11?logo=apple&logoColor=white" /> 
+    <img src="https://img.shields.io/badge/HomeKit-Compatible-f5b042?logo=apple&logoColor=white" /> 
+    <img src="https://img.shields.io/badge/License-MIT-blue.svg" /> 
+</div>
 
 ## 🌟 Overview
 
